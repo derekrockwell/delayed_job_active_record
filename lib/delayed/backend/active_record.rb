@@ -48,6 +48,9 @@ module Delayed
           ready_scope = ready_scope.where('priority >= ?', Worker.min_priority) if Worker.min_priority
           ready_scope = ready_scope.where('priority <= ?', Worker.max_priority) if Worker.max_priority
           ready_scope = ready_scope.where(:queue => Worker.queues) if Worker.queues.any?
+          #need to specify null values due to SQL comparisons with null
+          ready_scope = ready_scope.where('queue not in (?) or queue is null', Worker.except_queues) if Worker.except_queues.any?
+  
           ready_scope = ready_scope.by_priority
 
           now = self.db_time_now
